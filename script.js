@@ -50,14 +50,14 @@ function shell(inner){
 function landing(){
   document.body.classList.add('nmb');
   app.innerHTML=`<main class=nm><i class="nc c1"></i><i class="nc c2"></i><i class="nc c3"></i><i class="nc c4"></i>
-  <div class=nmcard><button class=nmlogo data-a=lamp aria-label="Tap the logo to sign in"><img src="${LOGO}" alt="CBSUA seal"></button>
-  <p class=nmhint>Tap the logo to sign in</p>
-  <div class=nmbody><h2>Welcome</h2><p class=nmsub>Sign in to continue your registration</p>
+  <div class=lp><div class="nmcard lpcard"><h2>Welcome</h2><p class=nmsub>Sign in to continue your registration</p>
   <div class=nmuni>Central Bicol State University of Agriculture</div>
   <h1 class=nmt>Digital Employee ID Registration</h1>
   <p class=nmcamp>Pili · Calabanga · Sipocot · Pasacao</p>
   <button class=nmbtn data-a=google>Sign in with institutional email</button>
-  <div class=nmpill>Institutional email required · For CBSUA employees</div></div></div></main>`}
+  <div class=nmpill>Institutional email required · For CBSUA employees</div></div>
+  <button class=lplogo data-a=lamp aria-label="Tap the logo to sign in"><img src="${LOGO}" alt="CBSUA seal"></button>
+  <p class=lphint>Tap the logo to sign in</p></div></main>`}
 function unverified(){app.innerHTML=`<main class=hero><div class=c><h1>Verify your email</h1><p>We sent a verification link to ${esc(auth.currentUser.email)}. Open it, then continue.</p><div class=row><button class=btn data-a=reload>I verified my email</button><button class="btn alt" data-a=out>Sign out</button></div></div></main>`}
 
 // ---- Employee ----

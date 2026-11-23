@@ -49,18 +49,16 @@ function shell(inner){
   ${S.admin?`<nav class=sn><div class=w><a data-a=nav data-v=ver class="${a('ver')}">Verification <span class=cnt id=c1 ${n?'':'hidden'}>${n}</span></a><a data-a=nav data-v=re class="${a('re')}">Reissue requests <span class=cnt id=c2 ${m?'':'hidden'}>${m}</span></a><a data-a=nav data-v=tpl class="${a('tpl')}">ID template</a><a data-a=nav data-v=prt class="${a('prt')}">ID printing <span class=cnt id=c3 ${pc?'':'hidden'}>${pc}</span></a></div></nav>`:`<nav class=sn><div class=w><a data-a=emp data-v=me class="${a('me')}">My ID record</a><a data-a=emp data-v=rp class="${a('rp')}">Reprinted ID <span class=cnt id=c4 ${pn?'':'hidden'}>${pn}</span></a></div></nav>`}</header><main class=dk><div class=w>${inner}</div></main>`}
 function landing(){
   document.body.classList.add('nmb');
-  app.innerHTML=`<main class=nm><div class=plx style="--d:-5"><div class=lpsky></div></div>
-  <div class=lp><div class=lpglow></div>
-  <div class=plx style="--d:-16"><i class="nc c1"></i><i class="nc c2"></i><i class="nc c3"></i><i class="nc c4"></i></div>
-  <div class=plx style="--d:9"><div class="nmcard lpcard"><h2>Welcome</h2><p class=nmsub>Sign in to continue your registration</p>
+  app.innerHTML=`<main class=nm><div class=lp>
+  <i class="nc c1"></i><i class="nc c2"></i><i class="nc c3"></i><i class="nc c4"></i>
+  <div class="nmcard lpcard"><h2>Welcome</h2><p class=nmsub>Sign in to continue your registration</p>
   <div class=nmuni>Central Bicol State University of Agriculture</div>
   <h1 class=nmt>Digital Employee ID Registration</h1>
   <p class=nmcamp>Pili · Calabanga · Sipocot · Pasacao</p>
   <button class=nmbtn data-a=google>Sign in with institutional email</button>
-  <div class=nmpill>Institutional email required · For CBSUA employees</div></div></div>
-  <div class=plx style="--d:22"><button class=lplogo data-a=lamp aria-label="Tap the logo to sign in"><img src="${LOGO}" alt="CBSUA seal"></button>
-  <p class=lphint>Tap the logo to sign in</p></div></div></main>`;
-  const nm=$('.nm');nm.addEventListener('pointermove',e=>{const r=nm.getBoundingClientRect();nm.style.setProperty('--mx',((e.clientX-r.left)/r.width-.5)*2);nm.style.setProperty('--my',((e.clientY-r.top)/r.height-.5)*2)})}
+  <div class=nmpill>Institutional email required · For CBSUA employees</div></div>
+  <button class=lplogo data-a=lamp aria-label="Tap the logo to sign in"><img src="${LOGO}" alt="CBSUA seal"></button>
+  <p class=lphint>Tap the logo to sign in</p></div></main>`}
 function unverified(){app.innerHTML=`<main class=hero><div class=c><h1>Verify your email</h1><p>We sent a verification link to ${esc(auth.currentUser.email)}. Open it, then continue.</p><div class=row><button class=btn data-a=reload>I verified my email</button><button class="btn alt" data-a=out>Sign out</button></div></div></main>`}
 
 // ---- Employee ----

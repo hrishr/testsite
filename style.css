@@ -95,23 +95,26 @@ nav.sn a.on{background:rgba(255,255,255,.4);color:#0b3a1b;box-shadow:inset 0 2px
 /* keep the page from shifting sideways when the scrollbar appears or disappears */
 html{overflow-y:scroll;scrollbar-gutter:stable}
 
-/* lamp-style sign in: the big logo zooms down to a small logo and reveals the sign-in behind it */
-.nm{background:#062a16;transition:background 1s}.nm.open{background:#dcefe0}
-.nm::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 48%,rgba(255,226,130,.3) 0%,rgba(255,226,130,0) 52%);opacity:1;transition:opacity 1s;pointer-events:none}
-.nm.open::before{opacity:0}
-.nm::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 24% 50%,rgba(255,255,255,.95) 0%,rgba(255,255,255,0) 58%);opacity:0;transition:opacity 1.2s;pointer-events:none}
-.nm.open::after{opacity:.8}
-.nc{opacity:0;transition:opacity 1s}.nm.open .nc{opacity:1}
+/* parallax zoom reveal: the big logo zooms out to a small logo and the sign-in comes forward from behind it */
+.nm{background:#062a16;overflow:hidden}
+.plx{position:absolute;inset:0;pointer-events:none;transform:translate3d(calc(var(--mx,0)*var(--d,0)*1px),calc(var(--my,0)*var(--d,0)*1px),0);transition:transform .35s ease-out}
+.lpsky{position:absolute;inset:-6%;background:radial-gradient(circle at 50% 48%,rgba(255,226,130,.3) 0,rgba(255,226,130,0) 45%),radial-gradient(1.6px 1.6px at 12% 22%,#fff,transparent),radial-gradient(1.2px 1.2px at 27% 70%,#dff,transparent),radial-gradient(1.8px 1.8px at 41% 14%,#fff,transparent),radial-gradient(1.2px 1.2px at 58% 82%,#fff,transparent),radial-gradient(1.6px 1.6px at 73% 28%,#dff,transparent),radial-gradient(1.2px 1.2px at 86% 64%,#fff,transparent),radial-gradient(1.8px 1.8px at 92% 12%,#fff,transparent),radial-gradient(1.2px 1.2px at 6% 88%,#dff,transparent);transition:transform 2.4s cubic-bezier(.65,0,.25,1),opacity 1.8s ease}
+.nm.open .lpsky{transform:scale(1.2);opacity:0}
 .lp{position:relative;width:min(100%,980px);height:min(88vh,640px);z-index:1}
-.lplogo{position:absolute;left:50%;top:48%;width:min(62vw,260px);height:min(62vw,260px);margin:0;padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer;z-index:3;display:grid;place-items:center;transform:translate(-50%,-50%) scale(1);box-shadow:0 0 70px 16px rgba(255,225,120,.55);animation:lpglow 2.8s ease-in-out infinite;transition:left .9s cubic-bezier(.2,.8,.2,1),top .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1),background .8s,box-shadow .8s}
+.lpglow{position:absolute;left:50%;top:48%;width:260vmax;height:260vmax;border-radius:50%;pointer-events:none;background:radial-gradient(circle closest-side,#f6fcf7 0%,#dcefe0 38%,#dcefe0 78%,rgba(220,239,224,0) 100%);transform:translate(-50%,-50%) scale(.03);transition:left 1.5s cubic-bezier(.65,0,.25,1),top 1.5s cubic-bezier(.65,0,.25,1),transform 1.9s cubic-bezier(.65,0,.25,1)}
+.nm.open .lpglow{left:22%;top:50%;transform:translate(-50%,-50%) scale(1)}
+.nc{opacity:0;transform:scale(.5);transition:opacity 1.2s ease .6s,transform 1.9s cubic-bezier(.65,0,.25,1)}
+.nm.open .nc{opacity:1;transform:scale(1.1)}
+.nc.c1{left:2%;top:6%;right:auto;bottom:auto}.nc.c2{right:5%;top:26%;left:auto;bottom:auto}.nc.c3{right:2%;bottom:5%;left:auto;top:auto}.nc.c4{left:9%;bottom:8%;right:auto;top:auto}
+.lplogo{position:absolute;left:50%;top:48%;width:min(62vw,260px);height:min(62vw,260px);margin:0;padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer;pointer-events:auto;display:grid;place-items:center;transform:translate(-50%,-50%) scale(1);box-shadow:0 0 70px 16px rgba(255,225,120,.55);animation:lpglow 2.8s ease-in-out infinite;transition:left 1.4s cubic-bezier(.65,0,.25,1),top 1.4s cubic-bezier(.65,0,.25,1),transform 1.4s cubic-bezier(.65,0,.25,1),background 1s,box-shadow 1s}
 .lplogo img{width:78%;height:78%;border-radius:50%;box-shadow:0 0 0 4px rgba(255,255,255,.25)}
 .lplogo:focus-visible{outline:3px solid #e9b730;outline-offset:6px}
 .nm.open .lplogo{left:22%;top:50%;transform:translate(-50%,-50%) scale(.42);animation:none;background:var(--b);box-shadow:18px 18px 38px var(--sd),-18px -18px 38px var(--sl)}
-.lpcard{position:absolute;left:50%;top:50%;margin:0;width:min(92%,390px);z-index:2;opacity:0;pointer-events:none;transform:translate(-50%,-50%) scale(.4);transition:left .9s cubic-bezier(.2,.8,.2,1) .15s,top .9s cubic-bezier(.2,.8,.2,1) .15s,transform .9s cubic-bezier(.2,.8,.2,1) .15s,opacity .6s .3s}
-.nm.open .lpcard{left:66%;opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
-.lphint{position:absolute;left:50%;top:calc(48% + 150px);transform:translateX(-50%);margin:0;font-size:14px;font-weight:600;color:#bfe3c9;white-space:nowrap;z-index:3;animation:lppulse 2s ease-in-out infinite;transition:opacity .4s}
-.nm.open .lphint{opacity:0;animation:none;pointer-events:none}
+.nm .lpcard{position:absolute;left:50%;top:50%;margin:0;width:min(92%,390px);opacity:0;pointer-events:none;filter:blur(14px);transform:translate(-50%,-50%) scale(.5);transition:left 1.5s cubic-bezier(.22,.8,.2,1) .1s,top 1.5s cubic-bezier(.22,.8,.2,1) .1s,transform 1.5s cubic-bezier(.22,.8,.2,1) .1s,opacity 1.1s ease .45s,filter 1.3s ease .4s}
+.nm.open .lpcard{left:66%;opacity:1;pointer-events:auto;filter:blur(0);transform:translate(-50%,-50%) scale(1)}
+.lphint{position:absolute;left:50%;top:calc(48% + 150px);transform:translateX(-50%);margin:0;font-size:14px;font-weight:600;color:#bfe3c9;white-space:nowrap;animation:lppulse 2s ease-in-out infinite;transition:opacity .4s}
+.nm.open .lphint{opacity:0;animation:none}
 @keyframes lpglow{0%,100%{box-shadow:0 0 50px 8px rgba(255,225,120,.35)}50%{box-shadow:0 0 90px 24px rgba(255,225,120,.75)}}
 @keyframes lppulse{0%,100%{opacity:.55}50%{opacity:1}}
-@media(max-width:760px){.lp{height:min(94vh,720px)}.nm.open .lplogo{left:50%;top:14%}.nm.open .lpcard{left:50%;top:60%}.nm::after{background:radial-gradient(circle at 50% 14%,rgba(255,255,255,.95) 0%,rgba(255,255,255,0) 55%)}}
-@media(prefers-reduced-motion:reduce){.nm,.nm *,.nm::before,.nm::after{transition:none!important;animation:none!important}}
+@media(max-width:760px){.lp{height:min(94vh,720px)}.nm.open .lplogo{left:50%;top:14%}.nm.open .lpcard{left:50%;top:60%}.nm.open .lpglow{left:50%;top:14%}}
+@media(prefers-reduced-motion:reduce){.nm,.nm *{transition:none!important;animation:none!important}}

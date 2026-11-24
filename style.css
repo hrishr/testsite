@@ -113,7 +113,7 @@ html{overflow-y:scroll;scrollbar-gutter:stable}
 @keyframes lpglow{0%,100%{box-shadow:0 0 50px 8px rgba(255,225,120,.3)}50%{box-shadow:0 0 90px 24px rgba(255,225,120,.7)}}
 @keyframes lppulse{0%,100%{opacity:.55}50%{opacity:1}}
 @media(max-width:760px){.lp{height:min(94vh,720px)}.nm.open .lplogo{left:50%;top:14%}.nm .lpcard{left:50%;top:60%}}
-@media(prefers-reduced-motion:reduce){.nm,.nm *{transition:none!important;animation:none!important}}
+@media(prefers-reduced-motion:reduce){.nm *{animation:none!important}}
 
 /* no blue tap flash or selection box on phones */
 a,button,input,select,textarea,label,[data-a],.lplogo,.lplogo img{-webkit-tap-highlight-color:transparent}

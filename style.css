@@ -95,24 +95,30 @@ nav.sn a.on{background:rgba(255,255,255,.4);color:#0b3a1b;box-shadow:inset 0 2px
 /* keep the page from shifting sideways when the scrollbar appears or disappears */
 html{overflow-y:scroll;scrollbar-gutter:stable}
 
-/* tap the logo: it slowly shrinks, the olive green slowly turns light green, and the sign-in fades in */
-.nm{background:linear-gradient(135deg,#55662a 0%,#55662a 34%,#dcefe0 66%,#dcefe0 100%);background-size:300% 300%;background-position:0% 0%;transition:background-position 3.4s ease-in-out;overflow:hidden}
-.nm.open{background-position:100% 100%}
-.lp{position:relative;width:min(100%,980px);height:min(88vh,640px);z-index:1}
-.nc{opacity:0;transition:opacity .4s}
-.nm.open .nc{opacity:1;transition:opacity 2s ease 1.4s}
+/* tap the logo: it shrinks, the olive green fades to light green, and the sign-in fades in (GPU-friendly: only transform and opacity animate) */
+.nm{background:#55662a;overflow:hidden}
+.nm::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 24% 50%,#f4fbf5 0%,#e6f4e9 35%,#dcefe0 75%);opacity:0;transition:opacity .6s ease;pointer-events:none;will-change:opacity}
+.nm.open::before{opacity:1;transition:opacity 2.2s cubic-bezier(.4,0,.2,1)}
+.lp{position:relative;width:min(100%,980px);height:min(88vh,640px);z-index:1;container-type:size}
+.nc{opacity:0;transition:opacity .4s;will-change:opacity}
+.nm.open .nc{opacity:1;transition:opacity 1.4s ease .8s}
 .nc.c1{left:2%;top:6%;right:auto;bottom:auto}.nc.c2{right:5%;top:26%;left:auto;bottom:auto}.nc.c3{right:2%;bottom:5%;left:auto;top:auto}.nc.c4{left:9%;bottom:8%;right:auto;top:auto}
-.lplogo{position:absolute;left:50%;top:48%;width:min(62vw,260px);height:min(62vw,260px);margin:0;padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer;display:grid;place-items:center;z-index:3;transform:translate(-50%,-50%) scale(1);box-shadow:0 0 70px 16px rgba(255,225,120,.5);animation:lpglow 2.8s ease-in-out infinite;transition:left 2.6s cubic-bezier(.45,.05,.2,1),top 2.6s cubic-bezier(.45,.05,.2,1),transform 2.6s cubic-bezier(.45,.05,.2,1),background 2s,box-shadow 2s}
+.lplogo{position:absolute;left:50%;top:48%;width:min(62vw,260px);height:min(62vw,260px);margin:0;padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer;display:grid;place-items:center;z-index:3;transform:translate(-50%,-50%) scale(1);transition:transform 1.8s cubic-bezier(.4,0,.2,1);will-change:transform;backface-visibility:hidden}
+.lplogo::before,.lplogo::after{content:"";position:absolute;inset:0;border-radius:50%;z-index:-1;pointer-events:none;transition:opacity 1.2s ease}
+.lplogo::before{box-shadow:0 0 70px 16px rgba(255,225,120,.6);opacity:.55;animation:lpglow 2.8s ease-in-out infinite}
+.lplogo::after{background:var(--b);box-shadow:18px 18px 38px var(--sd),-18px -18px 38px var(--sl);opacity:0}
 .lplogo img{width:78%;height:78%;border-radius:50%;box-shadow:0 0 0 4px rgba(255,255,255,.25)}
 .lplogo:focus-visible{outline:3px solid #e9b730;outline-offset:6px}
-.nm.open .lplogo{left:22%;top:50%;transform:translate(-50%,-50%) scale(.42);animation:none;background:var(--b);box-shadow:18px 18px 38px var(--sd),-18px -18px 38px var(--sl)}
-.nm .lpcard{position:absolute;left:66%;top:50%;margin:0;width:min(92%,390px);z-index:2;opacity:0;pointer-events:none;transform:translate(-50%,-50%);transition:opacity .5s ease}
-.nm.open .lpcard{opacity:1;pointer-events:auto;transition:opacity 1.8s ease 1.3s}
-.lphint{position:absolute;left:50%;top:calc(48% + 150px);transform:translateX(-50%);margin:0;font-size:14px;font-weight:600;color:#eef3d6;white-space:nowrap;z-index:3;animation:lppulse 2s ease-in-out infinite;transition:opacity .6s}
+.nm.open .lplogo{transform:translate(calc(-50% - 28cqw),calc(-50% + 2cqh)) scale(.42)}
+.nm.open .lplogo::before{animation:none;opacity:0}
+.nm.open .lplogo::after{opacity:1}
+.nm .lpcard{position:absolute;left:66%;top:50%;margin:0;width:min(92%,390px);z-index:2;opacity:0;pointer-events:none;transform:translate(-50%,calc(-50% + 18px));transition:opacity .4s ease,transform .4s ease;will-change:opacity,transform}
+.nm.open .lpcard{opacity:1;pointer-events:auto;transform:translate(-50%,-50%);transition:opacity 1.3s ease .7s,transform 1.3s cubic-bezier(.2,.7,.2,1) .7s}
+.lphint{position:absolute;left:50%;top:calc(48% + 150px);transform:translateX(-50%);margin:0;font-size:14px;font-weight:600;color:#eef3d6;white-space:nowrap;z-index:3;animation:lppulse 2s ease-in-out infinite;transition:opacity .5s}
 .nm.open .lphint{opacity:0;animation:none}
-@keyframes lpglow{0%,100%{box-shadow:0 0 50px 8px rgba(255,225,120,.3)}50%{box-shadow:0 0 90px 24px rgba(255,225,120,.7)}}
+@keyframes lpglow{0%,100%{opacity:.35}50%{opacity:.9}}
 @keyframes lppulse{0%,100%{opacity:.55}50%{opacity:1}}
-@media(max-width:760px){.lp{height:min(94vh,720px)}.nm.open .lplogo{left:50%;top:14%}.nm .lpcard{left:50%;top:60%}}
+@media(max-width:760px){.lp{height:min(94vh,720px)}.nm.open .lplogo{transform:translate(-50%,calc(-50% - 34cqh)) scale(.4)}.nm .lpcard{left:50%;top:60%}.nm::before{background:radial-gradient(circle at 50% 14%,#f4fbf5 0%,#e6f4e9 35%,#dcefe0 75%)}}
 @media(prefers-reduced-motion:reduce){.nm *{animation:none!important}}
 
 /* no blue tap flash or selection box on phones */

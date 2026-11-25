@@ -31,11 +31,19 @@
     <div class="card-wrap">
       <div class="tools">
         <button id="save" class="btn">Save</button>
-        <button id="year" class="btn ghost">Add 12 months</button>
+        <button id="fill12" class="btn ghost">Add 12 months</button>
         <button id="row" class="btn ghost">Add row</button>
         <button id="print" class="btn ghost">Print</button>
         <button id="del" class="btn danger">Delete card</button>
+        <button id="adm" class="btn ghost" hidden>Manage admins</button>
+        <span id="role" class="badge"></span>
         <span id="msg"></span>
+      </div>
+
+      <div id="admin" class="panel" hidden>
+        <h3>ADMINISTRATORS</h3>
+        <div class="addadm"><input id="aemail" type="email" placeholder="name@cbsua.edu.ph"><button id="aadd" class="btn">Add admin</button></div>
+        <ul id="alist"></ul>
       </div>
 
       <div class="card panel">
@@ -48,7 +56,7 @@
         <div class="scroll">
         <table>
           <thead>
-            <tr><th rowspan="3">PERIOD</th><th rowspan="3">PARTICULARS</th><th colspan="4">VACATION LEAVE</th><th colspan="4">SICK LEAVE</th><th rowspan="3">DATE AND ACTION TAKEN ON APPLICATION FOR LEAVE</th><th rowspan="3" class="np"></th></tr>
+            <tr><th rowspan="3" class="per">PERIOD<input id="yr" type="number" min="1990" max="2100" placeholder="Year"></th><th rowspan="3">PARTICULARS</th><th colspan="4">VACATION LEAVE</th><th colspan="4">SICK LEAVE</th><th rowspan="3">DATE AND ACTION TAKEN ON APPLICATION FOR LEAVE</th><th rowspan="3" class="np"></th></tr>
             <tr><th>EARNED</th><th>ABS. UND. W/P</th><th>BAL.</th><th>ABS. UND. WOP</th><th>EARNED</th><th>ABS. UND. W/P</th><th>BAL.</th><th>ABS. UND. WOP</th></tr>
           </thead>
           <tbody id="rows"></tbody>

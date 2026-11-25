@@ -33,9 +33,13 @@ auth.onAuthStateChanged(async u => {
   }
   $("login").hidden = !!u; $("app").hidden = !u; $("out").hidden = !u;
   $("who").textContent = u ? u.email : "";
-  if (u) { $("role").textContent = isAdmin ? (isSuper ? "SUPER ADMIN" : "ADMIN") : "VIEW ONLY"; await loadList(); if (!isAdmin && all.length) { curId = all[0].id; fill(all[0]); render(); } else newCard(); }
+  if (u) { $("role").textContent = isAdmin ? (isSuper ? "SUPER ADMIN" : "ADMIN") : "VIEW ONLY"; if (!isAdmin) $("name").value = u.displayName || u.email;   // show the signed-in name right away
+    await loadList();
+    if (!isAdmin && all.length) { curId = all[0].id; fill(all[0]); render(); }
+    else { newCard(); if (!isAdmin) $("name").value = u.displayName || u.email; } }
 });
 function applyRole() {
+  document.body.classList.toggle("viewer", !isAdmin);
   document.querySelectorAll("#app .card input, #app .card select").forEach(e => e.disabled = !isAdmin);
   ["save","fill12","row","del","new"].forEach(id => $(id).hidden = !isAdmin);
   $("adm").hidden = !isSuper;
@@ -136,15 +140,24 @@ async function loadList() {
   render();
 }
 function render() {
+  if (!isAdmin) { // employees: only year buttons above their own card
+    $("years").hidden = !all.length;
+    $("years").innerHTML = "";
+    all.forEach(c => {
+      const b = document.createElement("button");
+      b.textContent = c.year || "No year"; b.className = c.id === curId ? "on" : "";
+      b.onclick = () => { curId = c.id; fill(c); render(); };
+      $("years").appendChild(b);
+    });
+    return;
+  }
+  $("years").hidden = true;
   const q = $("q").value.toLowerCase();
   $("cards").innerHTML = "";
-  $("q").hidden = !isAdmin;
-  $("ltitle").textContent = isAdmin ? "LEAVE CARDS" : "MY LEAVE CARD - SELECT YEAR";
-  if (!isAdmin && !all.length) $("cards").innerHTML = `<li>No leave card found for the name on your account (${user.displayName || user.email}). Please inform HRMDO.</li>`;
-  all.filter(c => !isAdmin || (c.name + c.division).toLowerCase().includes(q)).forEach(c => {
+  all.filter(c => (c.name + c.division).toLowerCase().includes(q)).forEach(c => {
     const li = document.createElement("li");
-    li.className = (isAdmin ? "" : "yr ") + (c.id === curId ? "on" : "");
-    li.innerHTML = isAdmin ? `${c.name}<small>${c.division || ""}${c.year ? " · " + c.year : ""}</small>` : `${c.year || "No year"}`;
+    li.className = c.id === curId ? "on" : "";
+    li.innerHTML = `${c.name}<small>${c.division || ""}${c.year ? " · " + c.year : ""}</small>`;
     li.onclick = () => { curId = c.id; fill(c); render(); };
     $("cards").appendChild(li);
   });

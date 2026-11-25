@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leave Record Card | CBSUA</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="bar top">
+  <img src="logo.png" alt="CBSUA logo">
+  <div><h1>CENTRAL BICOL STATE UNIVERSITY OF AGRICULTURE</h1><h2>LEAVE RECORD CARD</h2></div>
+  <div class="user"><span id="who"></span><button id="out" class="btn ghost" hidden>Sign out</button></div>
+</header>
+
+<main>
+  <section id="login" class="panel center">
+    <p>Sign in with your CBSUA institutional email to continue.</p>
+    <button id="in" class="btn">Sign in with Google</button>
+    <p id="err" class="error"></p>
+  </section>
+
+  <section id="app" hidden>
+    <aside class="panel list">
+      <input id="q" type="search" placeholder="Search employee...">
+      <button id="new" class="btn full">+ New Leave Card</button>
+      <ul id="cards"></ul>
+    </aside>
+
+    <div class="card-wrap">
+      <div class="tools">
+        <button id="save" class="btn">Save</button>
+        <button id="year" class="btn ghost">Add 12 months</button>
+        <button id="row" class="btn ghost">Add row</button>
+        <button id="print" class="btn ghost">Print</button>
+        <button id="del" class="btn danger">Delete card</button>
+        <span id="msg"></span>
+      </div>
+
+      <div class="card panel">
+        <h3>LEAVE RECORD CARD</h3>
+        <div class="head">
+          <label>NAME <input id="name" placeholder="SURNAME, Given name M."></label>
+          <label>DIVISION / OFFICE <input id="div"></label>
+          <label>1st DAY OF SERVICE <input id="first" type="date"></label>
+        </div>
+        <div class="scroll">
+        <table>
+          <thead>
+            <tr><th rowspan="3">PERIOD</th><th rowspan="3">PARTICULARS</th><th colspan="4">VACATION LEAVE</th><th colspan="4">SICK LEAVE</th><th rowspan="3">DATE AND ACTION TAKEN ON APPLICATION FOR LEAVE</th><th rowspan="3" class="np"></th></tr>
+            <tr><th>EARNED</th><th>ABS. UND. W/P</th><th>BAL.</th><th>ABS. UND. WOP</th><th>EARNED</th><th>ABS. UND. W/P</th><th>BAL.</th><th>ABS. UND. WOP</th></tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        </div>
+        <p class="hint">Balance = previous balance + earned − absence/undertime with pay. Enter a balance manually only for the first (forwarded) row.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="bar bottom">&copy; 2026 OFFICE OF THE HUMAN RESOURCE MANAGEMENT AND DEVELOPMENT</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

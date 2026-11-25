@@ -82,16 +82,32 @@ $("fill12").onclick = () => {
 };
 $("print").onclick = () => window.print();
 
+/* ---- name matching: the card is found from the name on the employee's CBSUA Google account ---- */
+const norm = t => (t || "").toLowerCase().replace(/[.,]/g, "").replace(/\s+/g, " ").trim();
+function aliasesOf(full) { // "ABLAY, Atilano A." -> ["atilano ablay", "ablay atilano", "atilano a ablay", ...]
+  if (!full.includes(",")) return [];
+  const [sur, giv] = full.split(",").map(norm), g = giv.split(" ").filter(Boolean);
+  const words = g.filter(w => w.length > 1), mi = g.filter(w => w.length === 1).join(" ");
+  if (!sur || !words.length) return [];
+  const firsts = [...new Set([words.join(" "), words[0]])], out = new Set();
+  firsts.forEach(f => {
+    out.add(`${f} ${sur}`); out.add(`${sur} ${f}`);
+    if (mi) { out.add(`${f} ${mi} ${sur}`); out.add(`${sur} ${f} ${mi}`); }
+  });
+  return [...out];
+}
+const myKey = () => norm(user.displayName);
+
 /* ---- records ---- */
 function data() {
   return {
-    name: $("name").value.trim(), division: $("div").value.trim(), firstDay: $("first").value, year: $("yr").value, email: $("email").value.trim().toLowerCase(),
+    name: $("name").value.trim(), division: $("div").value.trim(), firstDay: $("first").value, year: $("yr").value, aliases: aliasesOf($("name").value),
     rows: [...$("rows").rows].map(tr => Object.fromEntries(F.map(k => [k, tr.querySelector(`[data-k="${k}"]`).value]))),
     updatedBy: user.email, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 }
 function fill(c) {
-  $("name").value = c.name || ""; $("div").value = c.division || ""; $("first").value = c.firstDay || ""; $("yr").value = c.year || ""; $("email").value = c.email || "";
+  $("name").value = c.name || ""; $("div").value = c.division || ""; $("first").value = c.firstDay || ""; $("yr").value = c.year || "";
   $("rows").innerHTML = ""; (c.rows || []).forEach(addRow); calc(); applyRole();
 }
 function newCard() { curId = null; fill({}); if (isAdmin) { addRow(); applyRole(); } render(); }
@@ -102,7 +118,7 @@ $("save").onclick = async () => {
   if (!isAdmin) return;
   const d = data();
   if (!d.name) return flash("Enter the employee name first.");
-  if (!d.email.endsWith("@" + ALLOWED_DOMAIN)) return flash("Enter the employee's @" + ALLOWED_DOMAIN + " email.");
+  if (!d.aliases.length) return flash("Write the name as SURNAME, Given name M.");
   try {
     if (curId) await col.doc(curId).set(d, {merge: true});
     else { const r = await col.add({...d, createdBy: user.email}); curId = r.id; }
@@ -114,7 +130,7 @@ $("del").onclick = async () => {
   await col.doc(curId).delete(); newCard(); loadList(); flash("Deleted.");
 };
 async function loadList() {
-  const s = isAdmin ? await col.orderBy("name").get() : await col.where("email", "==", user.email.toLowerCase()).get();
+  const s = isAdmin ? await col.orderBy("name").get() : await col.where("aliases", "array-contains", myKey()).get();
   all = s.docs.map(d => ({id: d.id, ...d.data()}));
   if (!isAdmin) all.sort((a, b) => n(b.year) - n(a.year)); // newest year first
   render();
@@ -124,8 +140,8 @@ function render() {
   $("cards").innerHTML = "";
   $("q").hidden = !isAdmin;
   $("ltitle").textContent = isAdmin ? "LEAVE CARDS" : "MY LEAVE CARD - SELECT YEAR";
-  if (!isAdmin && !all.length) $("cards").innerHTML = "<li>No leave card is linked to your email yet.</li>";
-  all.filter(c => !isAdmin || (c.name + c.division + c.email).toLowerCase().includes(q)).forEach(c => {
+  if (!isAdmin && !all.length) $("cards").innerHTML = `<li>No leave card found for the name on your account (${user.displayName || user.email}). Please inform HRMDO.</li>`;
+  all.filter(c => !isAdmin || (c.name + c.division).toLowerCase().includes(q)).forEach(c => {
     const li = document.createElement("li");
     li.className = (isAdmin ? "" : "yr ") + (c.id === curId ? "on" : "");
     li.innerHTML = isAdmin ? `${c.name}<small>${c.division || ""}${c.year ? " · " + c.year : ""}</small>` : `${c.year || "No year"}`;

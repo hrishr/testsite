@@ -53,3 +53,9 @@ input:disabled,select:disabled{color:inherit;opacity:1;-webkit-text-fill-color:v
 #alist li{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #e3efe1}
 #alist button{border:0;background:none;color:#b42318;cursor:pointer;font-weight:600}
 @media print{.per input{border:0}.badge{display:none}}
+
+.head .em{grid-column:1/-1}
+.list h4{margin:0 0 8px;font-size:12px;color:var(--g1);letter-spacing:1px}
+.list li.yr{font-weight:700;font-size:15px;text-align:center;border:1px solid #b9d4b6;border-radius:8px;margin-bottom:6px}
+.list li.yr.on{background:var(--g1);color:#fff;border-left:1px solid var(--g1)}
+.list li.yr small{color:inherit;opacity:.8;font-weight:400}

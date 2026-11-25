@@ -33,7 +33,7 @@ auth.onAuthStateChanged(async u => {
   }
   $("login").hidden = !!u; $("app").hidden = !u; $("out").hidden = !u;
   $("who").textContent = u ? u.email : "";
-  if (u) { $("role").textContent = isAdmin ? (isSuper ? "SUPER ADMIN" : "ADMIN") : "VIEW ONLY"; await loadList(); newCard(); }
+  if (u) { $("role").textContent = isAdmin ? (isSuper ? "SUPER ADMIN" : "ADMIN") : "VIEW ONLY"; await loadList(); if (!isAdmin && all.length) { curId = all[0].id; fill(all[0]); render(); } else newCard(); }
 });
 function applyRole() {
   document.querySelectorAll("#app .card input, #app .card select").forEach(e => e.disabled = !isAdmin);
@@ -85,13 +85,13 @@ $("print").onclick = () => window.print();
 /* ---- records ---- */
 function data() {
   return {
-    name: $("name").value.trim(), division: $("div").value.trim(), firstDay: $("first").value, year: $("yr").value,
+    name: $("name").value.trim(), division: $("div").value.trim(), firstDay: $("first").value, year: $("yr").value, email: $("email").value.trim().toLowerCase(),
     rows: [...$("rows").rows].map(tr => Object.fromEntries(F.map(k => [k, tr.querySelector(`[data-k="${k}"]`).value]))),
     updatedBy: user.email, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 }
 function fill(c) {
-  $("name").value = c.name || ""; $("div").value = c.division || ""; $("first").value = c.firstDay || ""; $("yr").value = c.year || "";
+  $("name").value = c.name || ""; $("div").value = c.division || ""; $("first").value = c.firstDay || ""; $("yr").value = c.year || ""; $("email").value = c.email || "";
   $("rows").innerHTML = ""; (c.rows || []).forEach(addRow); calc(); applyRole();
 }
 function newCard() { curId = null; fill({}); if (isAdmin) { addRow(); applyRole(); } render(); }
@@ -102,6 +102,7 @@ $("save").onclick = async () => {
   if (!isAdmin) return;
   const d = data();
   if (!d.name) return flash("Enter the employee name first.");
+  if (!d.email.endsWith("@" + ALLOWED_DOMAIN)) return flash("Enter the employee's @" + ALLOWED_DOMAIN + " email.");
   try {
     if (curId) await col.doc(curId).set(d, {merge: true});
     else { const r = await col.add({...d, createdBy: user.email}); curId = r.id; }
@@ -113,16 +114,21 @@ $("del").onclick = async () => {
   await col.doc(curId).delete(); newCard(); loadList(); flash("Deleted.");
 };
 async function loadList() {
-  const s = await col.orderBy("name").get();
-  all = s.docs.map(d => ({id: d.id, ...d.data()})); render();
+  const s = isAdmin ? await col.orderBy("name").get() : await col.where("email", "==", user.email.toLowerCase()).get();
+  all = s.docs.map(d => ({id: d.id, ...d.data()}));
+  if (!isAdmin) all.sort((a, b) => n(b.year) - n(a.year)); // newest year first
+  render();
 }
 function render() {
   const q = $("q").value.toLowerCase();
   $("cards").innerHTML = "";
-  all.filter(c => (c.name + c.division).toLowerCase().includes(q)).forEach(c => {
+  $("q").hidden = !isAdmin;
+  $("ltitle").textContent = isAdmin ? "LEAVE CARDS" : "MY LEAVE CARD - SELECT YEAR";
+  if (!isAdmin && !all.length) $("cards").innerHTML = "<li>No leave card is linked to your email yet.</li>";
+  all.filter(c => !isAdmin || (c.name + c.division + c.email).toLowerCase().includes(q)).forEach(c => {
     const li = document.createElement("li");
-    li.className = c.id === curId ? "on" : "";
-    li.innerHTML = `${c.name}<small>${c.division || ""}${c.year ? " · " + c.year : ""}</small>`;
+    li.className = (isAdmin ? "" : "yr ") + (c.id === curId ? "on" : "");
+    li.innerHTML = isAdmin ? `${c.name}<small>${c.division || ""}${c.year ? " · " + c.year : ""}</small>` : `${c.year || "No year"}`;
     li.onclick = () => { curId = c.id; fill(c); render(); };
     $("cards").appendChild(li);
   });

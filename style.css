@@ -59,3 +59,10 @@ input:disabled,select:disabled{color:inherit;opacity:1;-webkit-text-fill-color:v
 .list li.yr{font-weight:700;font-size:15px;text-align:center;border:1px solid #b9d4b6;border-radius:8px;margin-bottom:6px}
 .list li.yr.on{background:var(--g1);color:#fff;border-left:1px solid var(--g1)}
 .list li.yr small{color:inherit;opacity:.8;font-weight:400}
+
+.years{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.years button{padding:7px 18px;border:1px solid var(--g1);background:#fff;color:var(--g1);border-radius:99px;font:700 14px inherit;cursor:pointer}
+.years button.on{background:var(--g1);color:#fff}
+.viewer #app{display:block}
+.viewer .list,.viewer .tools{display:none!important}
+@media print{.years{display:none}}

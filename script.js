@@ -1,9 +1,11 @@
 /* ---- 1. Paste your Firebase web app config here (Project settings > Your apps) ---- */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCuwwqLUV34AeKR9YJRt44aoSeQYSoHDQs",
+  authDomain: "leave-computation.firebaseapp.com",
+  projectId: "leave-computation",
+  storageBucket: "leave-computation.firebasestorage.app",
+  messagingSenderId: "701888959391",
+  appId: "1:701888959391:web:4a8e8c93ee863b0c50a3aa"
 };
 const ALLOWED_DOMAIN = "cbsua.edu.ph";
 

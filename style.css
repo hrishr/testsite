@@ -9,7 +9,7 @@ body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:var
 .user{margin-left:auto;display:flex;gap:10px;align-items:center;font-size:13px}
 .bottom{margin-top:auto;border-top:3px solid var(--gold);justify-content:center;font-size:12px;font-weight:600;padding:18px}
 main{padding:16px 20px;flex:1}
-#app{display:grid;grid-template-columns:250px 1fr;gap:16px;align-items:start}
+#app{display:flex;gap:16px;align-items:flex-start}
 #app[hidden],[hidden]{display:none!important}
 .panel{background:var(--paper);border:1px solid #b9d4b6;border-radius:10px;padding:14px}
 .center{max-width:420px;margin:60px auto;text-align:center}
@@ -63,7 +63,6 @@ input:disabled,select:disabled{color:inherit;opacity:1;-webkit-text-fill-color:v
 .years{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .years button{padding:7px 18px;border:1px solid var(--g1);background:#fff;color:var(--g1);border-radius:99px;font:700 14px inherit;cursor:pointer}
 .years button.on{background:var(--g1);color:#fff}
-.viewer #app{display:block}
 .viewer .list,.viewer .tools{display:none!important}
 @media print{.years{display:none}}
 
@@ -87,3 +86,40 @@ input:disabled,select:disabled{color:inherit;opacity:1;-webkit-text-fill-color:v
   input::placeholder{color:transparent}
   select{background:none}
 }
+
+/* ---- modern collapsible sidebar ---- */
+.sidebar{--sb:#0e2a1b;position:sticky;top:12px;width:230px;flex:none;min-height:calc(100vh - 190px);background:linear-gradient(180deg,#0e2a1b,#133a27);color:#fff;border-radius:18px;padding:14px 12px;display:flex;flex-direction:column;gap:18px;box-shadow:0 10px 30px rgba(14,42,27,.35);transition:width .3s ease;z-index:5}
+.sidebar.collapsed{width:72px}
+.sb-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.avatar{width:40px;height:40px;border-radius:50%;background:#d4a72c center/cover;color:#0e2a1b;font-weight:800;display:grid;place-items:center;flex:none}
+.sb-toggle{width:30px;height:30px;border:0;border-radius:8px;background:#fff;color:var(--sb);display:grid;place-items:center;cursor:pointer;flex:none}
+.sb-toggle .ic{width:16px;height:16px;transition:transform .3s}
+.sidebar.collapsed .sb-top{flex-direction:column}
+.sidebar.collapsed .sb-toggle .ic{transform:rotate(180deg)}
+.sb-nav,.sb-bottom{display:flex;flex-direction:column;gap:6px}
+.sb-bottom{margin-top:auto}
+.sidebar .nav{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;border:0;border-radius:10px;background:none;color:#e6f1e9;font:500 14px inherit;text-align:left;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s}
+.sidebar .nav[hidden]{display:none}
+.sidebar .nav:hover{background:rgba(255,255,255,.12)}
+.sidebar .nav.on{background:#fff;color:var(--sb);font-weight:700}
+.sidebar .prof{cursor:default}.sidebar .prof:hover{background:none}
+.sidebar .prof .lbl{overflow:hidden;text-overflow:ellipsis;font-size:12px;opacity:.85}
+.ic{width:20px;height:20px;flex:none}
+.sidebar.collapsed .lbl{display:none}
+.sidebar.collapsed .nav{justify-content:center;padding:11px 0}
+.tip{display:none;position:absolute;left:calc(100% + 14px);top:50%;transform:translate(-6px,-50%);background:#fff;color:var(--sb);padding:6px 11px;border-radius:8px;font-size:12px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:all .3s ease}
+.sidebar.collapsed .tip{display:block}
+.sidebar.collapsed .nav:hover .tip{opacity:1;transform:translate(0,-50%)}
+.main{flex:1;min-width:0;display:grid;grid-template-columns:250px 1fr;gap:16px;align-items:start}
+.main.wide{grid-template-columns:1fr}
+.viewer .main{grid-template-columns:1fr}
+.viewer .sb-nav{display:none}
+@media(max-width:800px){
+  #app{flex-direction:column}
+  .sidebar,.sidebar.collapsed{position:static;width:100%;min-height:0;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px}
+  .sb-toggle,.tip{display:none!important}
+  .sb-nav,.sb-bottom{flex-direction:row;margin:0}.sb-bottom{margin-left:auto}
+  .sidebar.collapsed .lbl{display:inline}
+  .main{grid-template-columns:1fr}
+}
+@media print{.sidebar{display:none!important}.main{display:block}}

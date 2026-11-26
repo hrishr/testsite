@@ -33,7 +33,8 @@ auth.onAuthStateChanged(async u => {
   }
   $("login").hidden = !!u; $("app").hidden = !u; $("out").hidden = !u;
   $("who").textContent = u ? u.email : "";
-  if (u) { $("role").textContent = isAdmin ? (isSuper ? "SUPER ADMIN" : "ADMIN") : "VIEW ONLY"; if (!isAdmin) $("name").value = u.displayName || u.email;   // show the signed-in name right away
+  if (u) { $("role").textContent = isAdmin ? (isSuper ? "SUPER ADMIN" : "ADMIN") : "VIEW ONLY"; applyRole();
+    if (!isAdmin) $("name").value = u.displayName || u.email;   // show the signed-in name right away
     await loadList();
     if (!isAdmin && all.length) { curId = all[0].id; fill(all[0]); render(); }
     else { newCard(); if (!isAdmin) $("name").value = u.displayName || u.email; } }
@@ -88,19 +89,20 @@ $("print").onclick = () => window.print();
 
 /* ---- name matching: the card is found from the name on the employee's CBSUA Google account ---- */
 const norm = t => (t || "").toLowerCase().replace(/[.,]/g, "").replace(/\s+/g, " ").trim();
-function aliasesOf(full) { // "ABLAY, Atilano A." -> ["atilano ablay", "ablay atilano", "atilano a ablay", ...]
+function aliasesOf(full) { // "ABLAY, Atilano A." -> "Atilano Ablay", "Ablay Atilano", "Atilano A. Ablay", ... in 3 letter-cases
   if (!full.includes(",")) return [];
   const [sur, giv] = full.split(",").map(norm), g = giv.split(" ").filter(Boolean);
   const words = g.filter(w => w.length > 1), mi = g.filter(w => w.length === 1).join(" ");
   if (!sur || !words.length) return [];
-  const firsts = [...new Set([words.join(" "), words[0]])], out = new Set();
+  const firsts = [...new Set([words.join(" "), words[0]])], base = new Set();
   firsts.forEach(f => {
-    out.add(`${f} ${sur}`); out.add(`${sur} ${f}`);
-    if (mi) { out.add(`${f} ${mi} ${sur}`); out.add(`${sur} ${f} ${mi}`); }
+    base.add(`${f} ${sur}`); base.add(`${sur} ${f}`);
+    if (mi) [mi, mi + "."].forEach(m => { base.add(`${f} ${m} ${sur}`); base.add(`${sur} ${f} ${m}`); });
   });
-  return [...out];
+  const title = t => t.replace(/(^|\s)(\S)/g, (_, a, b) => a + b.toUpperCase());
+  return [...new Set([...base].flatMap(t => [t, t.toUpperCase(), title(t)]))];
 }
-const myKey = () => norm(user.displayName);
+const myKey = () => user.displayName || "";
 
 /* ---- records ---- */
 function data() {
@@ -133,16 +135,20 @@ $("del").onclick = async () => {
   if (!isAdmin || !curId || !confirm("Delete this leave card permanently?")) return;
   await col.doc(curId).delete(); newCard(); loadList(); flash("Deleted.");
 };
+let loadErr = "";
 async function loadList() {
-  const s = isAdmin ? await col.orderBy("name").get() : await col.where("aliases", "array-contains", myKey()).get();
-  all = s.docs.map(d => ({id: d.id, ...d.data()}));
-  if (!isAdmin) all.sort((a, b) => n(b.year) - n(a.year)); // newest year first
+  loadErr = "";
+  try {
+    const s = isAdmin ? await col.orderBy("name").get() : await col.where("aliases", "array-contains", myKey()).get();
+    all = s.docs.map(d => ({id: d.id, ...d.data()}));
+    if (!isAdmin) all.sort((a, b) => n(b.year) - n(a.year)); // newest year first
+  } catch (e) { all = []; loadErr = e.message; }
   render();
 }
 function render() {
   if (!isAdmin) { // employees: only year buttons above their own card
-    $("years").hidden = !all.length;
-    $("years").innerHTML = "";
+    $("years").hidden = false;
+    $("years").innerHTML = all.length ? "" : `<span class="vmsg">${loadErr ? "Cannot load your leave card: " + loadErr : "No leave card found for the name on your account (" + (user.displayName || user.email) + "). Please inform HRMDO."}</span>`;
     all.forEach(c => {
       const b = document.createElement("button");
       b.textContent = c.year || "No year"; b.className = c.id === curId ? "on" : "";

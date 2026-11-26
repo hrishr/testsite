@@ -34,7 +34,7 @@ auth.onAuthStateChanged(async u => {
   $("login").hidden = !!u; $("app").hidden = !u; $("out").hidden = !u;
   $("who").textContent = u ? u.email : "";
   if (u) { const av = $("avatar"); av.style.backgroundImage = u.photoURL ? `url("${u.photoURL}")` : ""; av.textContent = u.photoURL ? "" : (u.displayName || u.email)[0].toUpperCase(); }
-  if (u) { $("role").textContent = isAdmin ? (isSuper ? "SUPER ADMIN" : "ADMIN") : "VIEW ONLY"; applyRole();
+  if (u) { $("role").textContent = isAdmin ? (isSuper ? "SUPER ADMIN" : "ADMIN") : "VIEW ONLY"; applyRole(); appInit = false; curApp = null; showView("cards");
     if (!isAdmin) $("name").value = u.displayName || u.email;   // show the signed-in name right away
     await loadList();
     if (!isAdmin && all.length) { curId = all[0].id; fill(all[0]); render(); }
@@ -42,11 +42,14 @@ auth.onAuthStateChanged(async u => {
 });
 function applyRole() {
   document.body.classList.toggle("viewer", !isAdmin);
-  $("main").classList.toggle("wide", !isAdmin || !$("adminView").hidden);
+  $("main").classList.toggle("wide", !isAdmin || !$("adminView").hidden || !$("applyView").hidden);
   document.querySelectorAll("#app .card input, #app .card select").forEach(e => e.disabled = !isAdmin);
   ["save","fill12","row","del","new"].forEach(id => $(id).hidden = !isAdmin);
   $("navadm").hidden = !isSuper;
-  if (!isSuper) showView("cards");
+  const lbl = (id, t) => { $(id).querySelector(".lbl").textContent = t; $(id).querySelector(".tip").textContent = t; };
+  lbl("navcards", isAdmin ? "Leave Cards" : "My Leave Card"); lbl("navapply", isAdmin ? "Leave Applications" : "Apply for Leave");
+  $("newApp").hidden = isAdmin;
+  if (!isSuper && !$("adminView").hidden) showView("cards");
   document.querySelectorAll(".np button").forEach(b => b.hidden = !isAdmin);
 }
 
@@ -205,15 +208,19 @@ function render() {
 $("q").oninput = render;
 
 /* ---- admin management (super admin only) ---- */
-function showView(v) { // sidebar: Leave Cards / Manage Admin Roles
-  const adm = v === "admins" && isSuper;
-  $("cardView").hidden = adm; $("cardsPane").hidden = adm; $("adminView").hidden = !adm;
-  $("main").classList.toggle("wide", adm || !isAdmin);
-  $("navcards").classList.toggle("on", !adm); $("navadm").classList.toggle("on", adm);
-  if (adm) loadAdmins();
+let appInit = false;
+function showView(v) { // sidebar views: cards / apply / admins
+  if (v === "admins" && !isSuper) v = "cards";
+  $("cardView").hidden = $("cardsPane").hidden = v !== "cards";
+  $("adminView").hidden = v !== "admins"; $("applyView").hidden = v !== "apply";
+  $("main").classList.toggle("wide", v !== "cards" || !isAdmin);
+  [["navcards", "cards"], ["navapply", "apply"], ["navadm", "admins"]].forEach(([id, k]) => $(id).classList.toggle("on", v === k));
+  if (v === "admins") loadAdmins();
+  if (v === "apply") { loadApps(); if (!appInit) { appInit = true; newApp(); } }
 }
 $("navcards").onclick = () => showView("cards");
 $("navadm").onclick = () => showView("admins");
+$("navapply").onclick = () => showView("apply");
 async function loadAdmins() {
   const s = await admins.get();
   $("alist").innerHTML = `<li><span>${SUPER_ADMIN} <small>(super admin)</small></span></li>`;
@@ -237,4 +244,97 @@ try { if (localStorage.getItem("sbCollapsed") === "1") $("sidebar").classList.ad
 $("toggle").onclick = () => {
   const c = $("sidebar").classList.toggle("collapsed");
   try { localStorage.setItem("sbCollapsed", c ? "1" : "0"); } catch (e) {}
+};
+
+/* ---- Apply for Leave: CSC Form No. 6 (Revised 2020) ---- */
+const appsCol = db.collection("leaveApplications");
+let apps = [], curApp = null;
+const TYPES = [["Vacation Leave","Sec. 51, Rule XVI, Omnibus Rules Implementing E.O. No. 292"],["Mandatory/Forced Leave","Sec. 25, Rule XVI, Omnibus Rules Implementing E.O. No. 292"],["Sick Leave","Sec. 43, Rule XVI, Omnibus Rules Implementing E.O. No. 292"],["Maternity Leave","R.A. No. 11210 / IRR issued by CSC, DOLE and SSS"],["Paternity Leave","R.A. No. 8187 / CSC MC No. 71, s. 1998, as amended"],["Special Privilege Leave","Sec. 21, Rule XVI, Omnibus Rules Implementing E.O. No. 292"],["Solo Parent Leave","RA No. 8972 / CSC MC No. 8, s. 2004"],["Study Leave","Sec. 68, Rule XVI, Omnibus Rules Implementing E.O. No. 292"],["10-Day VAWC Leave","RA No. 9262 / CSC MC No. 15, s. 2005"],["Rehabilitation Privilege","Sec. 55, Rule XVI, Omnibus Rules Implementing E.O. No. 292"],["Special Leave Benefits for Women","RA No. 9710 / CSC MC No. 25, s. 2010"],["Special Emergency (Calamity) Leave","CSC MC No. 2, s. 2012, as amended"],["Adoption Leave","R.A. No. 8552"]];
+const tx = (name, ph = "") => `<input type="text" name="${name}" placeholder="${ph}">`;
+const rd = (name, val, label = val, text = "") => `<label class="o"><input type="radio" name="${name}" value="${val}"><span>${label}</span>${text ? tx(text) : ""}</label>`;
+function buildForm() {
+  $("appFs").innerHTML = `
+  <div class="hd"><img src="logo.png" alt=""><div><small>Republic of the Philippines</small><b>CENTRAL BICOL STATE UNIVERSITY OF AGRICULTURE</b><small>San Jose, Pili, Camarines Sur 4418 · www.cbsua.edu.ph · Trunkline: (054) 871-5531, 871-5533</small></div><i class="csf">Civil Service Form No. 6<br>Revised 2020</i></div>
+  <h2>APPLICATION FOR LEAVE</h2>
+  <div class="g c12"><div><b>1. OFFICE/DEPARTMENT</b>${tx("office")}</div><div><b>2. NAME</b><div class="nm"><span>(Last)${tx("last")}</span><span>(First)${tx("first")}</span><span>(Middle)${tx("middle")}</span></div></div></div>
+  <div class="g c3"><div><b>3. DATE OF FILING</b><input type="date" name="filed"></div><div><b>4. POSITION</b>${tx("position")}</div><div><b>5. SALARY</b>${tx("salary")}</div></div>
+  <div class="sec">6. DETAILS OF APPLICATION</div>
+  <div class="g c2">
+    <div><b>6.A TYPE OF LEAVE TO BE AVAILED OF</b>${TYPES.map(([t, c]) => rd("type", t, `${t} <small>(${c})</small>`)).join("")}${rd("type", "Others", "Others:", "typeOther")}</div>
+    <div><b>6.B DETAILS OF LEAVE</b>
+      <div class="sub">In case of Vacation/Special Privilege Leave:</div>${rd("place", "Within the Philippines")}${rd("place", "Abroad", "Abroad (Specify)", "abroad")}
+      <div class="sub">In case of Sick Leave:</div>${rd("sick", "In Hospital", "In Hospital (Specify Illness)", "hospital")}${rd("sick", "Out Patient", "Out Patient (Specify Illness)", "outpatient")}
+      <div class="sub">In case of Special Leave Benefits for Women:</div><label class="o"><span>(Specify Illness)</span>${tx("women")}</label>
+      <div class="sub">In case of Study Leave:</div>${rd("study", "Completion of Master's Degree")}${rd("study", "BAR/Board Examination Review")}
+      <div class="sub">Other purpose:</div>${rd("other", "Monetization of Leave Credits")}${rd("other", "Terminal Leave")}
+    </div>
+  </div>
+  <div class="g c2">
+    <div><b>6.C NUMBER OF WORKING DAYS APPLIED FOR</b><input type="number" step="0.5" min="0" name="days"><b class="mt">INCLUSIVE DATES</b>${tx("dates", "e.g. December 21-23, 28-29, 2026")}</div>
+    <div><b>6.D COMMUTATION</b>${rd("comm", "Not Requested")}${rd("comm", "Requested")}<div class="sig"><span id="sigName"></span><small>(Signature of Applicant)</small></div></div>
+  </div>
+  <div class="sec">7. DETAILS OF ACTION ON APPLICATION</div>
+  <div class="g c2">
+    <div><b>7.A CERTIFICATION OF LEAVE CREDITS</b><div class="ln">As of <span class="u"></span></div>
+      <table class="cr"><tr><th></th><th>Vacation Leave</th><th>Sick Leave</th></tr><tr><td><i>Total Earned</i></td><td></td><td></td></tr><tr><td><i>Less this application</i></td><td></td><td></td></tr><tr><td><i>Balance</i></td><td></td><td></td></tr></table>
+      <div class="off"><span class="u"></span><small>(Authorized Officer)</small></div></div>
+    <div><b>7.B RECOMMENDATION</b><label class="o"><input type="radio" disabled><span>For approval</span></label><label class="o"><input type="radio" disabled><span>For disapproval due to</span><span class="u grow"></span></label><div class="blank"></div><div class="off"><span class="u"></span><small>(Authorized Officer)</small></div></div>
+  </div>
+  <div class="g c2">
+    <div><b>7.C APPROVED FOR:</b><div class="ln"><span class="u s"></span> days with pay</div><div class="ln"><span class="u s"></span> days without pay</div><div class="ln"><span class="u s"></span> others (Specify)</div></div>
+    <div><b>7.D DISAPPROVED DUE TO:</b><div class="blank"></div></div>
+  </div>
+  <div class="off c"><span class="u"></span><small>(Authorized Official)</small></div>`;
+}
+buildForm();
+const appForm = () => $("appForm");
+const appFlash = t => { $("appMsg").textContent = t; setTimeout(() => $("appMsg").textContent = "", 5000); };
+const sig = () => { const f = appForm().elements, m = (f.middle.value || "").trim(); $("sigName").textContent = [f.first.value.trim(), m ? m[0].toUpperCase() + "." : "", f.last.value.trim()].filter(Boolean).join(" ").toUpperCase(); };
+appForm().addEventListener("input", sig);
+function fillForm(d) { appForm().reset(); Object.entries(d).forEach(([k, v]) => { const el = appForm().elements[k]; if (el && v != null && typeof v !== "object") el.value = v; }); sig(); }
+function guessName() { // from the employee's own leave card, otherwise from the Google account name
+  const c = all.find(x => (x.name || "").includes(","));
+  if (c) {
+    const [sur, giv] = c.name.split(",").map(t => t.trim()), w = giv.split(/\s+/); let mid = "";
+    if (w.length > 1 && w[w.length - 1].replace(".", "").length === 1) mid = w.pop().replace(".", "");
+    return {last: sur, first: w.join(" "), middle: mid, office: c.division || ""};
+  }
+  const w = (user.displayName || "").split(/\s+/).filter(Boolean);
+  return {last: w.length > 1 ? w.pop() : "", first: w.join(" "), middle: "", office: ""};
+}
+function newApp() {
+  curApp = null; $("appFs").disabled = isAdmin; $("submitApp").hidden = isAdmin;
+  fillForm(isAdmin ? {} : {...guessName(), filed: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)});
+  renderApps();
+}
+function openApp(a) { curApp = a.id; fillForm(a); $("appFs").disabled = true; $("submitApp").hidden = true; renderApps(); }
+$("newApp").onclick = newApp;
+$("printApp").onclick = () => window.print();
+function renderApps() {
+  $("appList").innerHTML = ""; $("appList").hidden = !apps.length;
+  apps.forEach(a => {
+    const b = document.createElement("button");
+    b.className = a.id === curApp ? "on" : "";
+    b.textContent = `${isAdmin ? `${a.last}, ${a.first} · ` : ""}${a.type === "Others" ? (a.typeOther || "Others") : a.type} · ${a.dates} · ${a.status || "Pending"}`;
+    b.onclick = () => openApp(a); $("appList").appendChild(b);
+  });
+}
+async function loadApps() {
+  try {
+    const s = isAdmin ? await appsCol.orderBy("createdAt", "desc").get() : await appsCol.where("ownerEmail", "==", user.email).get();
+    apps = s.docs.map(d => ({id: d.id, ...d.data()}));
+    if (!isAdmin) apps.sort((a, b) => ((b.createdAt && b.createdAt.seconds) || 0) - ((a.createdAt && a.createdAt.seconds) || 0));
+  } catch (e) { apps = []; appFlash("Cannot load applications: " + e.message); }
+  renderApps();
+}
+$("submitApp").onclick = async () => {
+  const d = Object.fromEntries(new FormData(appForm()));
+  const need = {office: "Office/Department", last: "Last name", first: "First name", filed: "Date of filing", position: "Position", salary: "Salary", type: "Type of leave", days: "Number of working days", dates: "Inclusive dates"};
+  const miss = Object.keys(need).filter(k => !String(d[k] || "").trim()).map(k => need[k]);
+  if (miss.length) return appFlash("Please complete: " + miss.join(", "));
+  try {
+    const ref = await appsCol.add({...d, ownerEmail: user.email, ownerName: user.displayName || "", status: "Pending", createdAt: firebase.firestore.FieldValue.serverTimestamp()});
+    await loadApps(); const a = apps.find(x => x.id === ref.id); if (a) openApp(a);
+    appFlash("Application submitted.");
+  } catch (e) { appFlash("Error: " + e.message); }
 };

@@ -42,7 +42,7 @@ td:nth-child(1){min-width:130px}td:nth-child(1) select,td:nth-child(1) input{wid
 .np button{border:0;background:none;color:#b42318;cursor:pointer;font-size:16px}
 .hint{font-size:11px;color:#5a6b60;margin:8px 0 0}
 @media(max-width:800px){#app{grid-template-columns:1fr}.head{grid-template-columns:1fr}.top h1{font-size:14px}}
-@media print{.top,.bottom,.list,.tools,.np,.hint{display:none!important}body,main{background:#fff;padding:0}#app{display:block}.panel{border:0;padding:0}@page{size:landscape;margin:10mm}}
+@media print{.top,.bottom,.list,.tools,.np,.hint{display:none!important}body,main{background:#fff;padding:0}#app{display:block}.panel{border:0;padding:0}@page{margin:10mm}}
 
 .per input{display:block;width:70px;margin:6px auto 0;padding:4px;border:1px solid var(--ink);border-radius:4px;text-align:center;font:600 12px inherit}
 input:disabled,select:disabled{color:inherit;opacity:1;-webkit-text-fill-color:var(--ink);background:transparent;appearance:none;-webkit-appearance:none}
@@ -113,7 +113,6 @@ input:disabled,select:disabled{color:inherit;opacity:1;-webkit-text-fill-color:v
 .main{flex:1;min-width:0;display:grid;grid-template-columns:250px 1fr;gap:16px;align-items:start}
 .main.wide{grid-template-columns:1fr}
 .viewer .main{grid-template-columns:1fr}
-.viewer .sb-nav{display:none}
 @media(max-width:800px){
   #app{flex-direction:column}
   .sidebar,.sidebar.collapsed{position:static;width:100%;min-height:0;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px}
@@ -123,3 +122,48 @@ input:disabled,select:disabled{color:inherit;opacity:1;-webkit-text-fill-color:v
   .main{grid-template-columns:1fr}
 }
 @media print{.sidebar{display:none!important}.main{display:block}}
+
+/* ---- Application for Leave (CS Form No. 6) ---- */
+@page card{size:landscape;margin:10mm}
+@page form{size:portrait;margin:10mm}
+.card.panel{page:card}.cs6{page:form}
+.atools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+#appMsg{font-size:13px;font-weight:600;color:var(--g1)}
+.cs6{background:#fff;color:#000;border:1px solid #b9d4b6;border-radius:10px;padding:14px;font-size:12px;max-width:900px}
+.cs6 fieldset{border:0;padding:0;margin:0;min-width:0}
+.cs6 .hd{display:flex;gap:12px;align-items:center;border-bottom:2px solid #000;padding-bottom:8px}
+.cs6 .hd img{width:62px;height:62px}
+.cs6 .hd small{display:block;line-height:1.35;font-size:10px}
+.cs6 .csf{margin-left:auto;font-size:10px;text-align:right}
+.cs6 h2{text-align:center;margin:10px 0 8px;font-size:18px}
+.cs6 .g{display:grid;border:1px solid #000;margin-top:-1px}
+.cs6 .g>div{padding:6px 8px;border-right:1px solid #000;min-width:0}.cs6 .g>div:last-child{border-right:0}
+.cs6 .c2{grid-template-columns:1fr 1fr}.cs6 .c3{grid-template-columns:1fr 1fr 1fr}.cs6 .c12{grid-template-columns:1fr 2fr}
+.cs6 .sec{border:1px solid #000;margin-top:-1px;text-align:center;font-weight:700;padding:4px;background:#e8f3e5}
+.cs6 .nm{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.cs6 .nm span{font-size:10px}
+.cs6 input[type=text],.cs6 input[type=date],.cs6 input[type=number]{border:0;border-bottom:1px solid #000;background:transparent;font:12px inherit;width:100%;padding:3px 2px;min-width:0}
+.cs6 label.o{display:flex;gap:6px;align-items:flex-start;margin:3px 0}
+.cs6 label.o small{color:#444;font-size:9px}
+.cs6 label.o input[type=text]{flex:1}
+.cs6 .sub{font-style:italic;margin:8px 0 2px}
+.cs6 .mt{display:block;margin-top:14px}
+.cs6 .sig{margin-top:26px;text-align:center}
+.cs6 .sig span{display:block;border-bottom:1px solid #000;font-weight:700;min-height:18px}
+.cs6 .sig small,.cs6 .off small{display:block}
+.cs6 .u{display:inline-block;border-bottom:1px solid #000;min-width:100px;height:14px}
+.cs6 .u.s{min-width:50px}.cs6 .u.grow{flex:1}
+.cs6 .ln{margin:6px 0}
+.cs6 .off{margin-top:22px;text-align:center}.cs6 .off .u{display:block;margin:0 auto 2px;width:80%}
+.cs6 .off.c{margin:18px auto 4px;width:300px}
+.cs6 .cr{border-collapse:collapse;width:100%;margin:8px 0}
+.cs6 .cr th,.cs6 .cr td{border:1px solid #000;padding:3px 5px;font-size:11px;height:20px}
+.cs6 .blank{height:64px}
+.cs6 input:disabled{opacity:1}
+@media print{
+  .atools,#appList{display:none!important}
+  .cs6{border:0;padding:0;max-width:none;font-size:10px;border-radius:0}
+  .cs6 input[type=text],.cs6 input[type=date],.cs6 input[type=number]{font-size:11px;font-weight:600}
+  .cs6 input[type=date]::-webkit-calendar-picker-indicator{display:none}
+}
+@media(max-width:800px){.cs6 .c2,.cs6 .c3,.cs6 .c12{grid-template-columns:1fr}.cs6 .g>div{border-right:0;border-bottom:1px solid #000}}

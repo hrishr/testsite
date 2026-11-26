@@ -1,9 +1,26 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function cbsua() { return request.auth != null && request.auth.token.email.matches('.*@cbsua[.]edu[.]ph$'); }
+    function superAdmin() { return cbsua() && request.auth.token.email == 'hris.hr@cbsua.edu.ph'; }
+    function admin() { return superAdmin() || (cbsua() && exists(/databases/$(database)/documents/admins/$(request.auth.token.email))); }
+
+    // only admins can edit; employees can view only their own cards
     match /leaveCards/{id} {
-      allow read, write: if request.auth != null
-        && request.auth.token.email.matches('.*@cbsua[.]edu[.]ph$');
+      // admins read all; employees read only cards whose name matches the name on their Google account (aliases saved with the card)
+      allow read: if admin() || (cbsua() && request.auth.token.name in resource.data.aliases);
+      allow write: if admin();
+    }
+    // leave applications: an employee can file and read only their own; admins read all and update the status
+    match /leaveApplications/{id} {
+      allow create: if cbsua() && request.resource.data.ownerEmail == request.auth.token.email;
+      allow read: if admin() || (cbsua() && resource.data.ownerEmail == request.auth.token.email);
+      allow update, delete: if admin();
+    }
+    // admin list: only the super admin manages it; each user can check their own entry
+    match /admins/{email} {
+      allow get: if cbsua() && request.auth.token.email == email;
+      allow list, write: if superAdmin();
     }
   }
 }

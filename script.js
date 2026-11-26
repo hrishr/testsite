@@ -33,6 +33,7 @@ auth.onAuthStateChanged(async u => {
   }
   $("login").hidden = !!u; $("app").hidden = !u; $("out").hidden = !u;
   $("who").textContent = u ? u.email : "";
+  if (u) { const av = $("avatar"); av.style.backgroundImage = u.photoURL ? `url("${u.photoURL}")` : ""; av.textContent = u.photoURL ? "" : (u.displayName || u.email)[0].toUpperCase(); }
   if (u) { $("role").textContent = isAdmin ? (isSuper ? "SUPER ADMIN" : "ADMIN") : "VIEW ONLY"; applyRole();
     if (!isAdmin) $("name").value = u.displayName || u.email;   // show the signed-in name right away
     await loadList();
@@ -41,6 +42,7 @@ auth.onAuthStateChanged(async u => {
 });
 function applyRole() {
   document.body.classList.toggle("viewer", !isAdmin);
+  $("main").classList.toggle("wide", !isAdmin || !$("adminView").hidden);
   document.querySelectorAll("#app .card input, #app .card select").forEach(e => e.disabled = !isAdmin);
   ["save","fill12","row","del","new"].forEach(id => $(id).hidden = !isAdmin);
   $("navadm").hidden = !isSuper;
@@ -206,6 +208,7 @@ $("q").oninput = render;
 function showView(v) { // sidebar: Leave Cards / Manage Admin Roles
   const adm = v === "admins" && isSuper;
   $("cardView").hidden = adm; $("cardsPane").hidden = adm; $("adminView").hidden = !adm;
+  $("main").classList.toggle("wide", adm || !isAdmin);
   $("navcards").classList.toggle("on", !adm); $("navadm").classList.toggle("on", adm);
   if (adm) loadAdmins();
 }
@@ -227,4 +230,11 @@ $("aadd").onclick = async () => {
   if (!em.endsWith("@" + ALLOWED_DOMAIN)) return $("amsg").textContent = "Use an @" + ALLOWED_DOMAIN + " email.";
   await admins.doc(em).set({addedBy: user.email, addedAt: firebase.firestore.FieldValue.serverTimestamp()});
   $("aemail").value = ""; loadAdmins();
+};
+
+/* ---- sidebar collapse (remembered) ---- */
+try { if (localStorage.getItem("sbCollapsed") === "1") $("sidebar").classList.add("collapsed"); } catch (e) {}
+$("toggle").onclick = () => {
+  const c = $("sidebar").classList.toggle("collapsed");
+  try { localStorage.setItem("sbCollapsed", c ? "1" : "0"); } catch (e) {}
 };

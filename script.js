@@ -43,8 +43,8 @@ function applyRole() {
   document.body.classList.toggle("viewer", !isAdmin);
   document.querySelectorAll("#app .card input, #app .card select").forEach(e => e.disabled = !isAdmin);
   ["save","fill12","row","del","new"].forEach(id => $(id).hidden = !isAdmin);
-  $("adm").hidden = !isSuper;
-  if (!isSuper) $("admin").hidden = true;
+  $("navadm").hidden = !isSuper;
+  if (!isSuper) showView("cards");
   document.querySelectorAll(".np button").forEach(b => b.hidden = !isAdmin);
 }
 
@@ -203,7 +203,14 @@ function render() {
 $("q").oninput = render;
 
 /* ---- admin management (super admin only) ---- */
-$("adm").onclick = () => { $("admin").hidden = !$("admin").hidden; if (!$("admin").hidden) loadAdmins(); };
+function showView(v) { // sidebar: Leave Cards / Manage Admin Roles
+  const adm = v === "admins" && isSuper;
+  $("cardView").hidden = adm; $("cardsPane").hidden = adm; $("adminView").hidden = !adm;
+  $("navcards").classList.toggle("on", !adm); $("navadm").classList.toggle("on", adm);
+  if (adm) loadAdmins();
+}
+$("navcards").onclick = () => showView("cards");
+$("navadm").onclick = () => showView("admins");
 async function loadAdmins() {
   const s = await admins.get();
   $("alist").innerHTML = `<li><span>${SUPER_ADMIN} <small>(super admin)</small></span></li>`;
@@ -216,7 +223,8 @@ async function loadAdmins() {
 }
 $("aadd").onclick = async () => {
   const em = $("aemail").value.trim().toLowerCase();
-  if (!em.endsWith("@" + ALLOWED_DOMAIN)) return flash("Use an @" + ALLOWED_DOMAIN + " email.");
+  $("amsg").textContent = "";
+  if (!em.endsWith("@" + ALLOWED_DOMAIN)) return $("amsg").textContent = "Use an @" + ALLOWED_DOMAIN + " email.";
   await admins.doc(em).set({addedBy: user.email, addedAt: firebase.firestore.FieldValue.serverTimestamp()});
   $("aemail").value = ""; loadAdmins();
 };

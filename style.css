@@ -68,3 +68,22 @@ input:disabled,select:disabled{color:inherit;opacity:1;-webkit-text-fill-color:v
 @media print{.years{display:none}}
 
 .vmsg{background:#fff;border:1px solid #b9d4b6;border-radius:8px;padding:8px 14px;font-size:13px}
+
+.list nav{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #e3efe1}
+.nav{text-align:left;padding:9px 12px;border:1px solid transparent;border-radius:6px;background:none;color:var(--g1);font:700 13px inherit;cursor:pointer}
+.nav:hover{background:#eef7ec}
+.nav.on{background:var(--g1);color:#fff}
+#adminView h3{margin:0 0 6px;letter-spacing:2px}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #adminView,.years,.list,.tools,.hint,.np{display:none!important}
+  #app{display:block}.card-wrap,.card{width:100%}
+  .scroll{overflow:visible}
+  table{min-width:0;width:100%;font-size:9px;table-layout:auto}
+  th{font-size:8px;background:#e8f3e5!important}
+  td input,td select{font-size:9px;padding:3px 1px}
+  td:nth-child(1){min-width:0}
+  .head input{border-bottom:1px solid #000;background:none;font-size:12px}
+  input::placeholder{color:transparent}
+  select{background:none}
+}

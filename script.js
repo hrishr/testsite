@@ -51,7 +51,18 @@ function applyRole() {
 /* ---- table ---- */
 const n = v => parseFloat(v) || 0, f3 = v => (Math.round(v * 1000) / 1000).toFixed(3);
 const days = (m, y) => [31, (y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m];
-const rangeFor = m => `1-${days(m, n($("yr").value) || new Date().getFullYear())}`;
+const earnedFor = (r, mi) => { // Table II: days x 1.25 / 30; a whole month = 1.250; day 31 earns nothing
+  const m = /(\d+)\s*-\s*(\d+)/.exec(r || ""); if (!m) return "";
+  const a = +m[1], b = +m[2], y = n($("yr").value) || new Date().getFullYear();
+  if (mi >= 0 && a === 1 && b >= days(mi, y)) return "1.250";
+  const d = Math.min(b, 30) - a + 1; // day 31 earns nothing
+  return f3(Math.max(d, 0) * 1.25 / 30);
+};
+const setEarned = (tr, r) => { const e = earnedFor(r, MONTHS.indexOf(tr.querySelector('[data-k="month"]').value)); if (e) ["vEarn", "sEarn"].forEach(k => tr.querySelector(`[data-k="${k}"]`).value = e); };
+const rangeFor = m => { // the first month of a new employee starts on the 1st day of service
+  const y = n($("yr").value) || new Date().getFullYear(), [sy, sm, sd] = ($("first").value || "").split("-").map(Number);
+  return sy === y && sm - 1 === m ? `${sd}-${days(m, y)}` : `1-${days(m, y)}`;
+};
 function addRow(d = {}) {
   const tr = document.createElement("tr"), esc = v => (v ?? "").toString().replace(/"/g, "&quot;");
   const opts = '<option value="">-- Month --</option>' + MONTHS.map(m => `<option${d.month === m ? " selected" : ""}>${m}</option>`).join("");
@@ -59,8 +70,8 @@ function addRow(d = {}) {
     F.slice(1).map(k => `<td><input data-k="${k}" value="${esc(d[k])}" ${/Bal$/.test(k) ? 'class="bal"' : ""}></td>`).join("") +
     `<td class="np"><button title="Delete row">&times;</button></td>`;
   tr.querySelector("button").onclick = () => { tr.remove(); calc(); };
-  tr.querySelector("select").onchange = e => { const i = MONTHS.indexOf(e.target.value); tr.querySelector('[data-k="range"]').value = i < 0 ? "" : rangeFor(i); };
-  tr.addEventListener("input", e => { if (!/Bal$/.test(e.target.dataset.k)) calc(); });
+  tr.querySelector("select").onchange = e => { const i = MONTHS.indexOf(e.target.value), r = i < 0 ? "" : rangeFor(i); tr.querySelector('[data-k="range"]').value = r; setEarned(tr, r); calc(); };
+  tr.addEventListener("input", e => { const k = e.target.dataset.k; if (k === "range") setEarned(tr, e.target.value); if (!/Bal$/.test(k)) calc(); });
   $("rows").appendChild(tr);
 }
 function calc() { // balance = previous balance + earned - absence with pay
@@ -82,7 +93,9 @@ function calc() { // balance = previous balance + earned - absence with pay
 $("row").onclick = () => { addRow(); applyRole(); };
 $("fill12").onclick = () => {
   if (!$("yr").value) { $("yr").value = new Date().getFullYear(); }
-  MONTHS.forEach((m, i) => addRow({month: m, range: rangeFor(i), vEarn: "1.250", sEarn: "1.250"}));
+  const [sy, sm] = ($("first").value || "").split("-").map(Number);
+  MONTHS.forEach((m, i) => { if (sy === +$("yr").value && i < sm - 1) return; // no credits before the 1st day of service
+    const r = rangeFor(i); addRow({month: m, range: r, vEarn: earnedFor(r, i), sEarn: earnedFor(r, i)}); });
   calc(); applyRole();
 };
 $("print").onclick = () => window.print();
@@ -141,6 +154,10 @@ async function loadList() {
   try {
     const s = isAdmin ? await col.orderBy("name").get() : await col.where("aliases", "array-contains", myKey()).get();
     all = s.docs.map(d => ({id: d.id, ...d.data()}));
+    if (isAdmin) all.forEach(c => { // refresh name matching for cards saved before it existed
+      const a = aliasesOf(c.name || "");
+      if (a.length && JSON.stringify(a) !== JSON.stringify(c.aliases || [])) { c.aliases = a; col.doc(c.id).update({aliases: a}).catch(() => {}); }
+    });
     if (!isAdmin) all.sort((a, b) => n(b.year) - n(a.year)); // newest year first
   } catch (e) { all = []; loadErr = e.message; }
   render();

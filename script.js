@@ -53,7 +53,9 @@ const n = v => parseFloat(v) || 0, f3 = v => (Math.round(v * 1000) / 1000).toFix
 const days = (m, y) => [31, (y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m];
 const earnedFor = (r, mi) => { // Table II: days x 1.25 / 30; a whole month = 1.250; day 31 earns nothing
   const m = /(\d+)\s*-\s*(\d+)/.exec(r || ""); if (!m) return "";
-  const a = +m[1], b = +m[2], y = n($("yr").value) || new Date().getFullYear();
+  let a = +m[1]; const b = +m[2], y = n($("yr").value) || new Date().getFullYear();
+  const [sy, sm, sd] = ($("first").value || "").split("-").map(Number);
+  if (sy === y && sm - 1 === mi) a = Math.max(a, sd);          // started mid-month: days before are not counted
   if (mi >= 0 && a === 1 && b >= days(mi, y)) return "1.250";
   const d = Math.min(b, 30) - a + 1; // day 31 earns nothing
   return f3(Math.max(d, 0) * 1.25 / 30);
@@ -81,7 +83,7 @@ function calc() { // balance = previous balance + earned - absence with pay
     const run = (prev, e, a, b) => {
       const hasData = g(e).value !== "" || g(a).value !== "";
       if (i === 0 && !hasData) return n(g(b).value);
-      if (prev === null) prev = n(g(b).value);
+      if (prev === null) prev = 0;
       if (!hasData && g(b).value === "") return prev;
       const v = prev + n(g(e).value) - n(g(a).value);
       g(b).value = f3(v); return v;
@@ -90,6 +92,18 @@ function calc() { // balance = previous balance + earned - absence with pay
     ps = run(ps, "sEarn", "sAbsW", "sBal");
   });
 }
+function applyStart() { // rows before the start month are dropped; the start month begins on the day of service
+  const [sy, sm] = ($("first").value || "").split("-").map(Number);
+  if (!sy || sy !== n($("yr").value)) return;
+  [...$("rows").rows].forEach(tr => {
+    const i = MONTHS.indexOf(tr.querySelector('[data-k="month"]').value);
+    if (i < 0) return;
+    if (i < sm - 1) tr.remove();
+    else if (i === sm - 1) { const r = rangeFor(i); tr.querySelector('[data-k="range"]').value = r; setEarned(tr, r); }
+  });
+  calc();
+}
+$("first").onchange = $("yr").onchange = applyStart;
 $("row").onclick = () => { addRow(); applyRole(); };
 $("fill12").onclick = () => {
   if (!$("yr").value) { $("yr").value = new Date().getFullYear(); }
@@ -135,6 +149,7 @@ function flash(t) { $("msg").textContent = t; setTimeout(() => $("msg").textCont
 
 $("save").onclick = async () => {
   if (!isAdmin) return;
+  applyStart();
   const d = data();
   if (!d.name) return flash("Enter the employee name first.");
   if (!d.aliases.length) return flash("Write the name as SURNAME, Given name M.");

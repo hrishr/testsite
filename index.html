@@ -23,28 +23,28 @@
 
   <section id="app" hidden>
     <aside class="panel list">
-      <h4 id="ltitle">LEAVE CARDS</h4>
-      <input id="q" type="search" placeholder="Search employee...">
-      <button id="new" class="btn full">+ New Leave Card</button>
-      <ul id="cards"></ul>
+      <nav>
+        <button id="navcards" class="nav on">Leave Cards</button>
+        <button id="navadm" class="nav" hidden>Manage Admin Roles</button>
+      </nav>
+      <div id="cardsPane">
+        <h4 id="ltitle">LEAVE CARDS</h4>
+        <input id="q" type="search" placeholder="Search employee...">
+        <button id="new" class="btn full">+ New Leave Card</button>
+        <ul id="cards"></ul>
+      </div>
     </aside>
 
     <div class="card-wrap">
+     <div id="cardView">
       <div class="tools">
         <button id="save" class="btn">Save</button>
         <button id="fill12" class="btn ghost">Add 12 months</button>
         <button id="row" class="btn ghost">Add row</button>
         <button id="print" class="btn ghost">Print</button>
         <button id="del" class="btn danger">Delete card</button>
-        <button id="adm" class="btn ghost" hidden>Manage admins</button>
         <span id="role" class="badge"></span>
         <span id="msg"></span>
-      </div>
-
-      <div id="admin" class="panel" hidden>
-        <h3>ADMINISTRATORS</h3>
-        <div class="addadm"><input id="aemail" type="email" placeholder="name@cbsua.edu.ph"><button id="aadd" class="btn">Add admin</button></div>
-        <ul id="alist"></ul>
       </div>
 
       <div id="years" class="years" hidden></div>
@@ -59,7 +59,7 @@
         <div class="scroll">
         <table>
           <thead>
-            <tr><th rowspan="3" class="per">PERIOD<input id="yr" type="number" min="1990" max="2100" placeholder="Year"></th><th rowspan="3">PARTICULARS</th><th colspan="4">VACATION LEAVE</th><th colspan="4">SICK LEAVE</th><th rowspan="3">DATE AND ACTION TAKEN ON APPLICATION FOR LEAVE</th><th rowspan="3" class="np"></th></tr>
+            <tr><th rowspan="2" class="per">PERIOD<input id="yr" type="number" min="1990" max="2100" placeholder="Year"></th><th rowspan="2">PARTICULARS</th><th colspan="4">VACATION LEAVE</th><th colspan="4">SICK LEAVE</th><th rowspan="2">DATE AND ACTION TAKEN ON APPLICATION FOR LEAVE</th><th rowspan="2" class="np"></th></tr>
             <tr><th>EARNED</th><th>ABS. UND. W/P</th><th>BAL.</th><th>ABS. UND. WOP</th><th>EARNED</th><th>ABS. UND. W/P</th><th>BAL.</th><th>ABS. UND. WOP</th></tr>
           </thead>
           <tbody id="rows"></tbody>
@@ -67,6 +67,15 @@
         </div>
         <p class="hint">Balance = previous balance + earned − absence/undertime with pay. Enter a balance manually only for the first (forwarded) row.</p>
       </div>
+     </div>
+
+     <div id="adminView" class="panel" hidden>
+       <h3>MANAGE ADMIN ROLES</h3>
+       <p class="hint">Admins can create and edit leave cards. Everyone else with a CBSUA account can only view their own card.</p>
+       <div class="addadm"><input id="aemail" type="email" placeholder="name@cbsua.edu.ph"><button id="aadd" class="btn">Add admin</button></div>
+       <p id="amsg" class="error"></p>
+       <ul id="alist"></ul>
+     </div>
     </div>
   </section>
 </main>
